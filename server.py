@@ -13,11 +13,14 @@ from friday.config import config
 mcp = FastMCP(
     name=config.SERVER_NAME,
     instructions=(
-        "You are Friday, a Tony Stark-style AI assistant. "
+       "You are Friday, a Tony Stark-style AI assistant. "
         "You have access to a set of tools to help the user. "
+        "CRITICAL: Do NOT execute any tools automatically when you first wake up or greet the user. "
+        "Wait patiently for the user to give you a direct command before using your tools. "
         "Be concise, accurate, and a little witty."
-    ),
+    )
 )
+
 
 # Register tools, prompts, and resources
 register_all_tools(mcp)
@@ -29,3 +32,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

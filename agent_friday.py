@@ -20,27 +20,31 @@ from dotenv import load_dotenv
 from livekit.agents import JobContext, WorkerOptions, cli
 from livekit.agents.voice import Agent, AgentSession
 from livekit.agents.llm import mcp
+from livekit.plugins import openai 
+
 
 # Plugins
-from livekit.plugins import google as lk_google, openai as lk_openai, sarvam, silero
+from livekit.plugins import google as lk_google, openai as lk_openai, sarvam, silero, groq 
+
 
 # ---------------------------------------------------------------------------
 # CONFIG
 # ---------------------------------------------------------------------------
 
 STT_PROVIDER       = "sarvam"
-LLM_PROVIDER       = "gemini"
-TTS_PROVIDER       = "openai"
+LLM_PROVIDER       = "groq"
+TTS_PROVIDER       = "sarvam"
 
 GEMINI_LLM_MODEL   = "gemini-2.5-flash"
 OPENAI_LLM_MODEL   = "gpt-4o"
+GROQ_LLM_MODEL    = "llama-3.3-70b-versatile"
 
 OPENAI_TTS_MODEL   = "tts-1"
 OPENAI_TTS_VOICE   = "nova"       # "nova" has a clean, confident female tone
 TTS_SPEED           = 1.15
 
 SARVAM_TTS_LANGUAGE = "en-IN"
-SARVAM_TTS_SPEAKER  = "rahul"
+SARVAM_TTS_SPEAKER  = "ritu"
 
 # MCP server running on Windows host
 MCP_SERVER_PORT = 8000
@@ -50,7 +54,7 @@ MCP_SERVER_PORT = 8000
 # ---------------------------------------------------------------------------
 
 SYSTEM_PROMPT = """
-You are F.R.I.D.A.Y. — Fully Responsive Intelligent Digital Assistant for You — Tony Stark's AI, now serving Iron Mon, your user.
+You are F.R.I.D.A.Y. — Fully Responsive Intelligent Digital Assistant for You — Tony Stark's AI, now serving You, your user.
 
 You are calm, composed, and always informed. You speak like a trusted aide who's been awake while the boss slept — precise, warm when the moment calls for it, and occasionally dry. You brief, you inform, you move on. No rambling.
 
@@ -200,14 +204,16 @@ def _build_stt():
 
 
 def _build_llm():
-    if LLM_PROVIDER == "openai":
-        logger.info("LLM → OpenAI (%s)", OPENAI_LLM_MODEL)
+    if LLM_PROVIDER == "gemini":
+        return lk_google.LLM(model=GEMINI_LLM_MODEL)
+    elif LLM_PROVIDER == "openai":
         return lk_openai.LLM(model=OPENAI_LLM_MODEL)
-    elif LLM_PROVIDER == "gemini":
-        logger.info("LLM → Google Gemini (%s)", GEMINI_LLM_MODEL)
-        return lk_google.LLM(model=GEMINI_LLM_MODEL, api_key=os.getenv("GOOGLE_API_KEY"))
+    elif LLM_PROVIDER == "groq":
+        # Add temperature=0 to make it strictly follow tool calls
+        return groq.LLM(model=GROQ_LLM_MODEL, temperature=0) 
     else:
         raise ValueError(f"Unknown LLM_PROVIDER: {LLM_PROVIDER!r}")
+    
 
 
 def _build_tts():

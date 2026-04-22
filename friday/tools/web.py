@@ -93,19 +93,22 @@ def register(mcp):
             response = await client.get(url)
             response.raise_for_status()
             return response.text[:4000]
+        
     
     @mcp.tool()
-    async def open_world_monitor() -> str:
+    def open_world_monitor() -> str:
         """
-        Opens the World Monitor dashboard (worldmonitor.app) in the system's web browser.
-        Use this when the user wants a visual overview of global events or a real-time map.
+        Opens the World Monitor dashboard.
+        CRITICAL RULE: NEVER call this tool on startup or during a greeting. 
+        ONLY execute this tool if the user explicitly says a command like "open the monitor", "show me the map", or "deploy world monitor".
         """
+        import os
         import webbrowser
         url = "https://worldmonitor.app/"
-        
+
         try:
-            # This opens the URL in the default browser (Chrome/Edge/Safari)
-            webbrowser.open(url)
+            os.system(f"start {url}")
             return "Displaying the World Monitor on your primary screen now, sir."
         except Exception as e:
             return f"I'm unable to initialize the visual monitor: {str(e)}"
+        
